@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<link rel="stylesheet" href="jquery-ui-1.12.1/jquery-ui.min.css">
+<style type="text/css">
+	*{
+		margin: 0px;
+		padding: 0px;
+	
+	}
+	
+	body{
+	font: 62.5%; 
+	
+	}
+	
+	.item{
+		margin: 3px;
+		padding: 5px;
+		
+	}
+	.item > img{
+		width: 50px;
+		height: 50px;
+		}
+	#wrap{
+		overflow: hidden;
+	}	
+	#wrap >div{
+		float: left;
+		}
+	#dock{
+		position: fixed;
+		min-height: 120px;
+		width: 100%;
+		bottom: 0px;
+		z-index: 1;
+	}	
+	
+	#dock > div{
+		float: right;
+	}
+</style>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+$(function(){
+
+	var arr;
+	
+	$("#btnCart").click(function(){
+		 
+		var cartList = $("#dock > .item");
+		$.each(cartList, function(idx,item){
+			var gno = $(item).attr("gno");
+			var g = {gno:gno};
+			$.ajax("insertCart", {data:g, success:function(){
+				
+			}});
+		});
+		
+	});
+	
+	
+	$.getJSON("goodsList", function(data){
+	arr = data;
+	$.each(arr, function(idx, s){
+		var item = $("<div class='ui-widget-content ui-corner-all item'></div>").attr("gno", s.no);
+		var img = $("<img/>").attr("src", "img/"+ s.fname);
+		var name = $("<p></p>").html("상품이름: " +s.item);
+		var price = $("<p></p>").html("가격:" + s.price);
+		var qty = $("<p></p>").html("수량: " +s.qty);
+		$(item).append(img,name,price,qty); 
+		$("#wrap").append(item);
+		
+		
+		});
+	
+	$("#wrap > div").draggable({
+		helper:"clone",
+		zIndex:120,
+		scroll:false
+	});
+	$("#dock").droppable({
+	accept:"#wrap > div",
+	drop:function(event, ui){
+		$(ui.draggable).fadeOut(function(){
+			$(this).appendTo("#dock").fadeIn();
+			
+		});	
+	}
+		
+	});
+	$("body").droppable({
+	accept:"#dock > div",
+	drop:function(event, ui){
+		$(ui.draggable).fadeOut(function(){
+			$(this).appendTo("#wrap").fadeIn();
+		});	
+	}	
+		
+	});
+	
+	});
+	
+	
+	
+	
+});
+</script>
+</head>
+<body>
+		<div id="wrap"></div>
+		<button id="btnCart">담기</button>
+		<div id="dock" class="ui-state-error"></div>
+</body>
+</html>
